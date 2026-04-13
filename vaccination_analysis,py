@@ -1,0 +1,148 @@
+import pandas as pd
+import numpy as np
+import matplotlib.pyplot as plt
+import seaborn as sns
+import os
+
+# Set visual style for seaborn
+sns.set_theme(style="whitegrid")
+
+# ==========================================
+# STEP 0: Setup & Synthetic Data Generation
+# ==========================================
+def generate_synthetic_data(filename="immunization_data.csv"):
+    """Generates a synthetic dataset for vaccination coverage if one doesn't exist."""
+    np.random.seed(42)
+    regions = ['North Region', 'South Region', 'East Region', 'West Region', 'Central Region']
+    demographics = ['Pediatric (0-12)', 'Teen (13-18)', 'Adult (19-64)', 'Senior (65+)']
+    
+    data = []
+    for region in regions:
+        for demo in demographics:
+            # Simulate varying target populations and vaccination counts
+            target_pop = np.random.randint(50000, 200000)
+            # Create a simulated variance in coverage to ensure some low-coverage areas
+            base_coverage = np.random.uniform(0.55, 0.95) 
+            vaccinated = int(target_pop * base_coverage)
+            
+            data.append({
+                'Region': region,
+                'Demographic': demo,
+                'Target_Population': target_pop,
+                'Vaccinated_Individuals': vaccinated
+            })
+            
+    df = pd.DataFrame(data)
+    df.to_csv(filename, index=False)
+    print(f"Synthetic data generated and saved to {filename}\n")
+
+# ==========================================
+# STEP 1: Load Immunization Datasets
+# ==========================================
+def load_and_preprocess_data(filepath):
+    """Loads data and calculates baseline metrics."""
+    print("Step 1: Loading immunization datasets...")
+    df = pd.read_csv(filepath)
+    
+    # Calculate Vaccination Coverage Rate (%)
+    df['Coverage_Rate_Pct'] = (df['Vaccinated_Individuals'] / df['Target_Population']) * 100
+    return df
+
+# ==========================================
+# STEP 2 & 3: Analyze Rates & Identify Low-Coverage
+# ==========================================
+def analyze_coverage_and_risk(df, risk_threshold=70.0):
+    """Analyzes trends and flags high-risk, low-coverage populations."""
+    print(f"Steps 2 & 3: Analyzing rates and identifying low-coverage areas (< {risk_threshold}%)...")
+    
+    # Flag regions requiring targeted campaigns
+    df['Risk_Level'] = np.where(df['Coverage_Rate_Pct'] < risk_threshold, 'High Risk', 'Standard')
+    
+    # Regional Aggregation
+    regional_summary = df.groupby('Region').agg({
+        'Target_Population': 'sum',
+        'Vaccinated_Individuals': 'sum'
+    }).reset_index()
+    regional_summary['Overall_Coverage_Pct'] = (regional_summary['Vaccinated_Individuals'] / regional_summary['Target_Population']) * 100
+    regional_summary = regional_summary.sort_values(by='Overall_Coverage_Pct', ascending=True)
+    
+    # High-Risk Filter
+    high_risk_df = df[df['Risk_Level'] == 'High Risk'].sort_values(by='Coverage_Rate_Pct', ascending=True)
+    
+    return regional_summary, high_risk_df
+
+# ==========================================
+# STEP 4: Visualize Coverage Patterns
+# ==========================================
+def generate_visualizations(df, regional_summary):
+    """Generates charts and heatmaps for the public health dashboard."""
+    print("Step 4: Generating vaccination coverage charts and risk maps...")
+    
+    fig = plt.figure(figsize=(16, 10))
+    
+    # Deliverable 1: Regional Vaccination Coverage Bar Chart
+    ax1 = plt.subplot(2, 2, 1)
+    sns.barplot(data=regional_summary, x='Overall_Coverage_Pct', y='Region', palette='viridis', ax=ax1)
+    ax1.set_title('Overall Vaccination Coverage by Region', fontweight='bold')
+    ax1.set_xlabel('Coverage Rate (%)')
+    ax1.set_ylabel('Region')
+    # Add target line
+    ax1.axvline(x=70, color='red', linestyle='--', label='70% Target')
+    ax1.legend()
+
+    # Deliverable 2: Demographic Coverage Distribution (Boxplot)
+    ax2 = plt.subplot(2, 2, 2)
+    sns.boxplot(data=df, x='Demographic', y='Coverage_Rate_Pct', palette='Set2', ax=ax2)
+    ax2.set_title('Coverage Distribution across Demographics', fontweight='bold')
+    ax2.set_ylabel('Coverage Rate (%)')
+    ax2.axhline(y=70, color='red', linestyle='--')
+
+    # Deliverable 3: Low-Coverage Risk Map (Heatmap representation)
+    ax3 = plt.subplot(2, 1, 2)
+    pivot_df = df.pivot(index='Region', columns='Demographic', values='Coverage_Rate_Pct')
+    sns.heatmap(pivot_df, annot=True, fmt=".1f", cmap="RdYlGn", center=70, linewidths=.5, ax=ax3)
+    ax3.set_title('Regional Risk Map: Coverage by Demographic (%)', fontweight='bold')
+    
+    plt.tight_layout()
+    plt.savefig('vaccination_dashboard.png', dpi=300)
+    print("Visualizations saved as 'vaccination_dashboard.png'\n")
+    plt.show()
+
+# ==========================================
+# STEP 5: Generate Insights Report
+# ==========================================
+def export_insights_report(df, regional_summary, high_risk_df):
+    """Compiles findings into a CSV report format."""
+    print("Generating Immunization Strategy Insights Report...")
+    
+    # Save the detailed risk breakdown
+    high_risk_df.to_csv('high_risk_intervention_targets.csv', index=False)
+    regional_summary.to_csv('regional_overview.csv', index=False)
+    
+    print("Deliverables saved:")
+    print("- high_risk_intervention_targets.csv (Targeted campaign list)")
+    print("- regional_overview.csv (Macro-level summary)")
+
+# ==========================================
+# MAIN EXECUTION BLOCK
+# ==========================================
+if __name__ == "__main__":
+    data_file = "immunization_data.csv"
+    
+    # 0. Generate data if not present
+    if not os.path.exists(data_file):
+        generate_synthetic_data(data_file)
+        
+    # 1. Load Data
+    df_vaccine = load_and_preprocess_data(data_file)
+    
+    # 2 & 3. Analyze and Flag
+    regional_data, risk_data = analyze_coverage_and_risk(df_vaccine, risk_threshold=70.0)
+    
+    # 4. Visualize
+    generate_visualizations(df_vaccine, regional_data)
+    
+    # 5. Export Deliverables
+    export_insights_report(df_vaccine, regional_data, risk_data)
+    
+    print("\nAnalysis Complete. System ready for public health review.")

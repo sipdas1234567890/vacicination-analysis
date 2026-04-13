@@ -1,0 +1,7 @@
+Region,Demographic,Target_Population,Vaccinated_Individuals,Coverage_Rate_Pct,Risk_Level
+West Region,Teen (13-18),115725,67842,58.62346079066752,High Risk
+East Region,Senior (65+),134478,81466,60.57942563095823,High Risk
+North Region,Senior (65+),187337,114724,61.23937075964705,High Risk
+Central Region,Teen (13-18),91606,56631,61.82018645066917,High Risk
+South Region,Senior (65+),114925,72969,63.492712638677396,High Risk
+Central Region,Senior (65+),118148,75893,64.23553509158005,High Risk

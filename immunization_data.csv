@@ -1,0 +1,21 @@
+Region,Demographic,Target_Population,Vaccinated_Individuals
+North Region,Pediatric (0-12),171958,149365
+North Region,Teen (13-18),153694,129532
+North Region,Adult (19-64),160268,126409
+North Region,Senior (65+),187337,114724
+South Region,Pediatric (0-12),137498,123262
+South Region,Teen (13-18),66023,53502
+South Region,Adult (19-64),114820,107697
+South Region,Senior (65+),114925,72969
+East Region,Pediatric (0-12),55311,52373
+East Region,Teen (13-18),135305,102818
+East Region,Adult (19-64),180608,137245
+East Region,Senior (65+),134478,81466
+West Region,Pediatric (0-12),180523,169601
+West Region,Teen (13-18),115725,67842
+West Region,Adult (19-64),169346,119047
+West Region,Senior (65+),116803,91919
+Central Region,Pediatric (0-12),61394,54884
+Central Region,Teen (13-18),91606,56631
+Central Region,Adult (19-64),137313,127639
+Central Region,Senior (65+),118148,75893
